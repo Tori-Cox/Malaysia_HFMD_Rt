@@ -16,7 +16,6 @@ library(forcats)
 ## read in data ----------------------------------------------------------------
 # this dataset contains the estimated Rt for Malaysia at the state level between 2009-2019
 # the variables matched to the data include school closure and climate variables over different lags
-# please note that the EV71 variable in the paper is not included in this data
 # please note that the cumulative incidence variable 'cum_inc' in the paper is not included in this data
 
 data <- readRDS("data/Rt_variables.RDS") 
@@ -35,7 +34,7 @@ source("functions.R")
 
 # run univariable analysis -----------------------------------------------------
 
-all_variables <- colnames(data)[c(12:131)]
+all_variables <- colnames(data)[c(5,13:132)]
 univar_results_table <- run_univar_analysis(data, variables = all_variables)
 
 best_univariable_result<- best_univar(univar_results_table)
@@ -53,6 +52,9 @@ plot_univariable
   # remove variables collinear with best variable from univariable analysis
   to_remove <- collinarity_check(data, all_variables, variable_chosen = best_univariable_result[[1]])
   step_variables <- all_variables[!all_variables %in% to_remove]
+  to_remove <- step_variables[grep(substring(best_univariable_result[[1]], 1,7),step_variables)]
+  step_variables <- step_variables[!step_variables %in% to_remove]
+  
 
   # run step 1 of forward selection process
   step1 <- run_multivar_analysis(data, variables_to_try = step_variables, 
@@ -64,6 +66,9 @@ plot_univariable
   # remove variables collinear with best variable from step 1
   to_remove <- collinarity_check(data, all_variables, variable_chosen = step1[[1]])
   step_variables <- step_variables[!step_variables %in% to_remove]
+  to_remove <- step_variables[grep(substring(step1[[1]], 1,7),step_variables)]
+  step_variables <- step_variables[!step_variables %in% to_remove]
+  
   
   # run step 2 of forward selection process
   step2 <- run_multivar_analysis(data, variables_to_try = step_variables, 
@@ -75,6 +80,8 @@ plot_univariable
   
   # remove variables collinear with best variable from step 2
   to_remove <- collinarity_check(data, all_variables, variable_chosen = step2[[1]])
+  step_variables <- step_variables[!step_variables %in% to_remove]
+  to_remove <- step_variables[grep(substring(step2[[1]], 1,7),step_variables)]
   step_variables <- step_variables[!step_variables %in% to_remove]
   
   # run step 3 of forward selection process
@@ -88,6 +95,8 @@ plot_univariable
   # remove variables collinear with best variable from step 3
   to_remove <- collinarity_check(data, all_variables, variable_chosen = step3[[1]])
   step_variables <- step_variables[!step_variables %in% to_remove]
+  to_remove <- step_variables[grep(substring(step3[[1]], 1,7),step_variables)]
+  step_variables <- step_variables[!step_variables %in% to_remove]
   
   # run step 4 of forward selection process
   step4 <- run_multivar_analysis(data, variables_to_try = step_variables, 
@@ -99,6 +108,8 @@ plot_univariable
   
   # remove variables collinear with best variable from step 4
   to_remove <- collinarity_check(data, all_variables, variable_chosen = step4[[1]])
+  step_variables <- step_variables[!step_variables %in% to_remove]
+  to_remove <- step_variables[grep(substring(step4[[1]], 1,7),step_variables)]
   step_variables <- step_variables[!step_variables %in% to_remove]
   
   # run step 5 of forward selection process
@@ -112,21 +123,10 @@ plot_univariable
   # remove variables collinear with best variable from step 5
   to_remove <- collinarity_check(data, all_variables, variable_chosen = step5[[1]])
   step_variables <- step_variables[!step_variables %in% to_remove]
-  
-  # run step 6 of forward selection process
-  step6 <- run_multivar_analysis(data, variables_to_try = step_variables, 
-                                 variables_chosen_already = c(best_univariable_result[[1]], step1[[1]], step2[[1]], step3[[1]], step4[[1]], step5[[1]]), 
-                                 stage = 6)
-  
-  # check waic decrease threshold reached
-  (round(as.numeric(step5[[2]])) - round(as.numeric(step6[[2]])))>4
-  
-  # remove variables collinear with best variable from step 6
-  to_remove <- collinarity_check(data, all_variables, variable_chosen = step6[[1]])
+  to_remove <- step_variables[grep(substring(step5[[1]], 1,7),step_variables)]
   step_variables <- step_variables[!step_variables %in% to_remove]
   step_variables
-  
-  
+
   
 # run final multivariable model and sample -------------------------------------
     model<- run_final_model(data) # this function has the variables pre coded

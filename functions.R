@@ -242,7 +242,7 @@ run_final_model <- function(data){
   ## prior for RE in INLA models
   precision.prior <- list(prec = list(prior = "pc.prec", param = c(0.5, 0.01)))
   
-  formula <- logRt ~ 1 + mean_temp + prop_hols + prop_hols14 + min_hum14 + cum_rf4  + max_hum7  + cum_rf12 +
+  formula <- logRt ~ 1 + mean_temp + prop_hols + max_hum + min_hum14 + ev71 + cum_rf +
     f(State, model="iid", hyper=precision.prior)+
     f(YEAR_NO, model="rw1", replicate=ISLAND_NO, hyper=precision.prior)
 
