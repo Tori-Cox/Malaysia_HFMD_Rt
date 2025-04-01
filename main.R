@@ -136,6 +136,7 @@ plot_univariable
     
     
     samples <- sampling(model, data, nsamp=1000)
+    data$pred_mean = model$summary.fitted.values$mean
         
       
 # plot final multivariable model results ---------------------------------------
@@ -145,3 +146,23 @@ plot_final_RE(random, choice="Year", shapefile=malaysia.1)
 
 plot_final_fit(samples, choice="Peninsular") # choice must be Peninsular or East
 plot_final_fit(samples, choice="East")
+
+
+# model validation and assessment of fit ---------------------------------------
+
+# Compute the marginal R-squared
+rsquared(model, data)
+
+# plot detrended time-series
+q1 <- plot_detrended_ts(choice="Peninsular") # choice must be Peninsular or East
+q2 <- plot_detrended_ts(choice="East") # choice must be Peninsular or East
+
+# plot density of the residuals
+p <- ggplot(data, aes(x = logRt - pred_mean))+
+  facet_wrap(~ State, ncol = 3) +
+  geom_histogram(binwidth=0.01) +
+  geom_vline(aes(xintercept=0),
+             color="red", linetype="dashed", linewidth=0.5) +
+  labs(x = "Residuals") +
+  theme_bw()
+

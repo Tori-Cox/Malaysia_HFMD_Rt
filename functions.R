@@ -394,3 +394,58 @@ plot_final_RE <- function(model_RE, choice, shapefile=NA){
   }
 }
 
+
+#### marginal r-squared
+rsquared <- function(model, data){
+  y_fixed <- model$summary.linear.predictor$mean
+  
+  # Calculate the observed values variance and predicted values variance
+  var_obs <- var(data$logRt)
+  var_fixed <- var(y_fixed)
+  
+  # Compute the marginal R-squared
+  r_squared <- var_fixed / var_obs
+  return(r_squared)
+}
+
+#### Examination of the trend
+# Detrending the observed time-series by subtracting the predicted values. The detrended series should appear stationary (i.e. with no clear trend)
+plot_detrended_ts <- function(choice){
+  
+  if(choice!="Peninsular" & choice !="East"){
+    warning("choice must be Peninsular or East")
+  }
+  
+  if(choice=="East"){
+    p<-ggplot(data[data$Island!="West",])+
+      facet_grid("State",scales="free")+
+      geom_bar(aes(x=date, y = logRt - pred_mean),stat = 'identity')+
+      labs(x="",y="Residuals",col=NULL)+
+      geom_hline(aes(yintercept=0),linetype="dashed")+
+      scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+      theme_bw()+
+      guides(col=guide_legend(override.aes=list(linewidth=5)))
+    return(p)
+  }
+  if(choice=="Peninsular"){
+    p1<-ggplot(data[data$State=="JOHOR"|data$State=="MELAKA"|data$State=="NEGERI SEMBILAN",])+
+      facet_grid("State",scales="free")+
+      geom_bar(aes(x=date, y = logRt - pred_mean),stat = 'identity')+
+      labs(x="",y="Residuals",col=NULL)+
+      geom_hline(aes(yintercept=0),linetype="dashed")+
+      scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+      theme_bw()+
+      guides(col=guide_legend(override.aes=list(linewidth=5)))
+    
+    p2<-ggplot(data[data$State=="PERAK"|data$State=="PULAU PINANG"|data$State=="SELANGOR",])+
+      facet_grid("State",scales="free")+
+      geom_bar(aes(x=date, y = logRt - pred_mean),stat = 'identity')+
+      labs(x="",y="Residuals",col=NULL)+
+      geom_hline(aes(yintercept=0),linetype="dashed")+
+      scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+      theme_bw()+
+      guides(col=guide_legend(override.aes=list(linewidth=5)))
+    
+    return(list(p1,p2))
+  }
+}
