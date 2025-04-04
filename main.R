@@ -154,8 +154,8 @@ plot_final_fit(samples, choice="East")
 rsquared(model, data)
 
 # plot detrended time-series
-q1 <- plot_detrended_ts(choice="Peninsular") # choice must be Peninsular or East
-q2 <- plot_detrended_ts(choice="East") # choice must be Peninsular or East
+q1 <- plot_detrended_ts(choice="Peninsular", data) # choice must be Peninsular or East
+q2 <- plot_detrended_ts(choice="East", data) # choice must be Peninsular or East
 
 # plot density of the residuals
 p <- ggplot(data, aes(x = logRt - pred_mean))+

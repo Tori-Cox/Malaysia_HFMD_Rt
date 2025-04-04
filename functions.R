@@ -281,7 +281,7 @@ if(choice!="Peninsular" & choice !="East"){
 }
   
 if(choice=="East"){
-p<-ggplot(data[data$Island!="West",])+
+p<-ggplot(data_sampled[data_sampled$Island!="West",])+
   facet_grid("State",scales="free")+
   geom_line(aes(x=date,y=exp(logRt),group=EPI_PERIOD_NO,col="Calculated"))+
   labs(x="Date",y="Rt",col=NULL)+
@@ -297,7 +297,7 @@ p<-ggplot(data[data$Island!="West",])+
 return(p)
 }
 if(choice=="Peninsular"){
-p1<-ggplot(data[data$State=="JOHOR"|data$State=="MELAKA"|data$State=="NEGERI SEMBILAN",])+
+p1<-ggplot(data_sampled[data_sampled$State=="JOHOR"|data_sampled$State=="MELAKA"|data_sampled$State=="NEGERI SEMBILAN",])+
   facet_grid("State",scales="free")+
   geom_line(aes(x=date,y=exp(logRt),group=EPI_PERIOD_NO,col="Calculated"))+
   labs(x="Date",y="Rt",col=NULL)+
@@ -311,7 +311,7 @@ p1<-ggplot(data[data$State=="JOHOR"|data$State=="MELAKA"|data$State=="NEGERI SEM
   scale_color_manual(values = c("grey","red"))+
   guides(col=guide_legend(override.aes=list(linewidth=5)))
 
-p2<-ggplot(data[data$State=="PERAK"|data$State=="PULAU PINANG"|data$State=="SELANGOR",])+
+p2<-ggplot(data_sampled[data_sampled$State=="PERAK"|data_sampled$State=="PULAU PINANG"|data_sampled$State=="SELANGOR",])+
   facet_grid("State",scales="free")+
   geom_line(aes(x=date,y=exp(logRt),group=EPI_PERIOD_NO,col="Calculated"))+
   labs(x="Date",y="Rt",col=NULL)+
@@ -325,7 +325,21 @@ p2<-ggplot(data[data$State=="PERAK"|data$State=="PULAU PINANG"|data$State=="SELA
   scale_color_manual(values = c("grey","red"))+
   guides(col=guide_legend(override.aes=list(linewidth=5)))
 
-return(list(p1,p2))
+p3<-ggplot(data_sampled[data_sampled$State=="KUALA LUMPUR"|data_sampled$State=="KELANTAN"|data_sampled$State=="KEDAH",])+
+  facet_grid("State",scales="free")+
+  geom_line(aes(x=date,y=exp(logRt),group=EPI_PERIOD_NO,col="Calculated"))+
+  labs(x="Date",y="Rt",col=NULL)+
+  geom_errorbar(data=data_sampled[data_sampled$State=="KUALA LUMPUR"|data_sampled$State=="KELANTAN"|data_sampled$State=="KEDAH",],
+                aes(x=date,ymin=exp(est_low),ymax=exp(est_upp),group=EPI_PERIOD_NO),col="pink")+
+  geom_line(data=data_sampled[data_sampled$State=="KUALA LUMPUR"|data_sampled$State=="KELANTAN"|data_sampled$State=="KEDAH",],
+            aes(x=date,y=exp(est),group=EPI_PERIOD_NO,col="Estimated"))+
+  geom_hline(aes(yintercept=1),linetype="dashed")+
+  theme_bw()+
+  theme(legend.position="bottom")+
+  scale_color_manual(values = c("grey","red"))+
+  guides(col=guide_legend(override.aes=list(linewidth=5)))
+
+return(list(p1,p2,p3))
 }
 }
 
@@ -410,7 +424,7 @@ rsquared <- function(model, data){
 
 #### Examination of the trend
 # Detrending the observed time-series by subtracting the predicted values. The detrended series should appear stationary (i.e. with no clear trend)
-plot_detrended_ts <- function(choice){
+plot_detrended_ts <- function(choice, data){
   
   if(choice!="Peninsular" & choice !="East"){
     warning("choice must be Peninsular or East")
@@ -446,6 +460,15 @@ plot_detrended_ts <- function(choice){
       theme_bw()+
       guides(col=guide_legend(override.aes=list(linewidth=5)))
     
-    return(list(p1,p2))
+    p3<-ggplot(data[data$State=="KUALA LUMPUR"|data$State=="KELANTAN"|data$State=="KEDAH",])+
+      facet_grid("State",scales="free")+
+      geom_bar(aes(x=date, y = logRt - pred_mean),stat = 'identity')+
+      labs(x="",y="Residuals",col=NULL)+
+      geom_hline(aes(yintercept=0),linetype="dashed")+
+      scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+      theme_bw()+
+      guides(col=guide_legend(override.aes=list(linewidth=5)))
+    
+    return(list(p1,p2,p3))
   }
 }
